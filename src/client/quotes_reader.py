@@ -4,11 +4,12 @@ import urllib.request
 import re
 
 class QuotesReader():
-    def __init__(self):
+    def __init__(self, url):
+        self.url = url
         return
 
-    def readQuotes(self, url):
-        resp = urllib.request.urlopen(url)
+    def read_quotes(self):
+        resp = urllib.request.urlopen(self.url)
         content = str(resp.read())
         result = content.split(r'\n\n')
         quotes = []
@@ -21,6 +22,6 @@ class QuotesReader():
         return quotes
 
 if __name__ == "__main__":
-    qr = QuotesReader()
-    result = qr.readQuotes('https://raw.githubusercontent.com/zhehaowang/zhehao.me/master/quotes.md')
+    qr = QuotesReader('https://raw.githubusercontent.com/zhehaowang/zhehao.me/master/quotes.md')
+    result = qr.readQuotes()
     print(result)

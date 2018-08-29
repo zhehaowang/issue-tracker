@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-from gsheet_client import GSheetClient
+
+# TODO: fix this path issue
+from .gsheet_client import GSheetClient
 import datetime
 
 SPREADSHEET_ID     = '1hloMXB_eL1f_OWpZR3qDSwc51AJQjLslr_yNR0u7n8c'
@@ -14,7 +16,7 @@ class ItemsReader():
         self.client = client
         return
 
-    def readDaily(self):
+    def read_daily(self):
         rows = self.client.read(SPREADSHEET_ID, DAILY_SHEET_RANGE)
         daily = dict()
         cnt = 0
@@ -32,13 +34,13 @@ class ItemsReader():
             }
         return daily
 
-    def readReviewBacklog(self):
+    def read_review_backlog(self):
         return
 
-    def readItemsBacklog(self):
+    def read_items_backlog(self):
         return
 
-    def readConf(self):
+    def read_conf(self):
         rows = self.client.read(SPREADSHEET_ID, CONF_SHEET_RANGE)
         confs = dict()
         cnt = 0
@@ -53,4 +55,4 @@ class ItemsReader():
 
 if __name__ == "__main__":
     ir = ItemsReader(GSheetClient())
-    print(ir.readDaily())
+    print(ir.read_daily())
