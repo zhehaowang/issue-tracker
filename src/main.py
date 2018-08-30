@@ -7,7 +7,10 @@ from notify.emailer       import Emailer
 from conf_reader          import ConfReader
 
 import random
-import datetime
+from datetime    import date, datetime, timedelta
+from collections import OrderedDict
+
+MAX_REVIEW_ITEM_CNT = 3
 
 def select_quote(quote_reader):
     result = quote_reader.read_quotes()
@@ -16,6 +19,51 @@ def select_quote(quote_reader):
 def send_email(emailer, sender, receiver, msg):
     emailer.send(sender, receiver, msg)
     return
+
+def merge_review_items(daily, confs, reviews):
+    review_schedule = []
+    for i in range(1, 6):
+        key = 'review-' + str(i)
+        if key in confs:
+            review_schedule.append(int(confs[key]))
+
+    candidate_items = []
+    for entry in daily:
+        items = daily[entry]['item'].split(';')
+        for item in items:
+            key = item.strip()
+            start_time = datetime.now()
+            if key:
+                if key in reviews:
+                    # update review dates of review-n that is not done yet
+                    offset = 0
+                    for r in reviews[key]:
+                        if r["status"] != "done":
+                            projected_time = start_time + timedelta(hours = review_schedule[offset])
+                            if r["time"] < projected_time:
+                                r["time"] = projected_time
+                                r["reschedule_cnt"] += 1
+                                # rescheduled items get a higher priority
+                                candidate_items.insert(0, key)
+                        offset += 1
+                else:
+                    # write scheduled review dates, starting from today
+                    reviews[key] = []
+                    for hour in review_schedule:
+                        event = {
+                            "status": "scheuduled",
+                            "time": start_time + timedelta(hours = hour),
+                            "reschedule_cnt": 0
+                        }
+                        reviews[key].append(event)
+                        if hour <= 24:
+                            candidate_items.append(key)
+
+    max_review_items = MAX_REVIEW_ITEM_CNT
+    if 'max-review-items' in confs:
+        max_review_items = int(confs['max-review-items'])
+
+    return candidate_items[:max_review_items]
 
 if __name__ == "__main__":
     # What it does:
@@ -30,13 +78,23 @@ if __name__ == "__main__":
     quote = select_quote(quote_reader)
     quote_str = "Quote of the day: " + "\n" + quote['content'] + "\n" + quote["author"]
 
-    # items_reader = ItemsReader(GSheetClient())
-    # print(ir.read_daily())
+    items_reader = ItemsReader(GSheetClient('client/token.json', 'client/credentials.json'))
+    daily = items_reader.read_daily()
+    confs = items_reader.read_conf()
 
-    today_str = datetime.date.today().strftime("%B %d %Y")
-    msg = 'Subject: {}\n\n{}'.format('Issues for ' + today_str, quote_str)
+    review_items = dict()
+    todo_list = merge_review_items(daily, confs, review_items)
+    todo_list_str = "\n".join(todo_list)
+    todo_list_str = "Consider reviewing the following today:\n" + todo_list_str
+
+    greetings_str = "Hi,\n"
+    close_str     = "Thanks,\nBot\n\nP.S. remember to update your progress here:\nhttps://docs.google.com/spreadsheets/d/1hloMXB_eL1f_OWpZR3qDSwc51AJQjLslr_yNR0u7n8c/edit"
+
+    today_str = date.today().strftime("%B %d %Y")
+    msg = 'Subject: {}\n\n{}\n{}\n\n{}\n\n{}'.format('Issues for ' + today_str, greetings_str, todo_list_str, quote_str, close_str)
+
+    print(msg)
 
     emailer = Emailer(conf_reader['email-user'], conf_reader['email-pwd'])
     send_email(emailer, conf_reader['email-sender'], [conf_reader['email-recipient']], msg)
-
 

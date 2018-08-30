@@ -7,18 +7,18 @@ from httplib2 import Http
 from oauth2client import file, client, tools
 
 class GSheetClient():
-    def __init__(self):
-        self.service = self.create_service()
+    def __init__(self, token_file_name = 'token.json', cred_file_name = 'credentials.json'):
+        self.service = self.create_service(token_file_name, cred_file_name)
         return
 
-    def create_service(self):
+    def create_service(self, token_file_name, cred_file_name):
         # If modifying these scopes, delete the file token.json.
         scopes = 'https://www.googleapis.com/auth/spreadsheets'
 
-        store = file.Storage('token.json')
+        store = file.Storage(token_file_name)
         creds = store.get()
         if not creds or creds.invalid:
-            flow = client.flow_from_clientsecrets('credentials.json', scopes)
+            flow = client.flow_from_clientsecrets(cred_file_name, scopes)
             creds = tools.run_flow(flow, store)
         return build('sheets', 'v4', http = creds.authorize(Http()))
 
