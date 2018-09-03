@@ -27,9 +27,8 @@ class TestReview(unittest.TestCase):
             'max-review-items': '1'
         }
         reviews = {}
-        result = r.merge_review_items(daily, conf, reviews)
-        print(result)
-        self.assertEqual(result,  ['it 1'], "Expect 1st item from day1")
+        r.merge_review_items(daily, conf, reviews)
+        self.assertEqual(r.reschedule_and_generate_todo(conf, reviews),  ['it 1'], "Expect 1st item from day1")
 
 if __name__ == '__main__':
     unittest.main()

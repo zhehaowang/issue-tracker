@@ -22,12 +22,12 @@ class GSheetClient():
             creds = tools.run_flow(flow, store)
         return build('sheets', 'v4', http = creds.authorize(Http()))
 
-    def read(self, sheet_id, range):
+    def read(self, sheet_id, range_id):
         if not self.service:
             raise RuntimeError('GSheet service not set up, check oauth step')
 
         result = self.service.spreadsheets().values().get(spreadsheetId = sheet_id,
-                                                          range = range).execute()
+                                                          range = range_id).execute()
         values = result.get('values', [])
         return values
 
@@ -38,7 +38,19 @@ class GSheetClient():
         #         # Print columns A and E, which correspond to indices 0 and 4.
         #         print('%s, %s' % (row[0], row[1]))
 
+    def write(self, sheet_id, range_id, values):
+        body = {
+            'values': values
+        }
+        result = self.service.spreadsheets().values().update(
+            spreadsheetId = sheet_id,
+            range = range_id,
+            valueInputOption = "USER_ENTERED",
+            body = body).execute()
+        return result.get('updatedCells')
 
 if __name__ == "__main__":
     client = GSheetClient()
-    client.read('1hloMXB_eL1f_OWpZR3qDSwc51AJQjLslr_yNR0u7n8c', 'review_backlog!A1:ZZ')
+    values = client.read('1hloMXB_eL1f_OWpZR3qDSwc51AJQjLslr_yNR0u7n8c', 'review_backlog!A1:ZZ')
+    values.append(['Test', 'Test'])
+    client.write('1hloMXB_eL1f_OWpZR3qDSwc51AJQjLslr_yNR0u7n8c', 'review_backlog!A1:ZZ', values)

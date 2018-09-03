@@ -34,8 +34,32 @@ class ItemsReader():
             }
         return daily
 
+    def deserialize_review_events(self, content):
+        contents = content.split(';')
+        if len(contents) != 3:
+            raise ValueError("unexpected row size, " + str(content))
+        event = {
+            'time': datetime.datetime.strptime(contents[0].strip(), '%m/%d/%y'),
+            'status': contents[1].strip().lower(),
+            'reschedule_cnt': int(contents[2].strip())
+        }
+        return event
+
     def read_review_backlog(self):
-        return
+        rows = self.client.read(SPREADSHEET_ID, REVIEW_SHEET_RANGE)
+        reviews = dict()
+        cnt = 0
+        for row in rows:
+            cnt += 1
+            if cnt == 1:
+                continue
+            if row[0] in reviews:
+                raise ValueError("duplicated dates")
+            events = []
+            for i in range(1, len(row)):
+                events.append(self.deserialize_review_events(row[i]))
+            reviews[row[0]] = events
+        return reviews
 
     def read_items_backlog(self):
         return
@@ -52,6 +76,9 @@ class ItemsReader():
                 raise ValueError("duplicated key")
             confs[row[0]] = row[1]
         return confs
+
+    def write_review_backlog(self, values):
+        return self.client.write(SPREADSHEET_ID, REVIEW_SHEET_RANGE, values)
 
 if __name__ == "__main__":
     ir = ItemsReader(GSheetClient())
