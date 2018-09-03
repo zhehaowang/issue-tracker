@@ -20,12 +20,6 @@ def send_email(emailer, sender, receiver, msg):
     return
 
 if __name__ == "__main__":
-    # What it does:
-    # 1. Read through review items, see which ones we need to review today,
-    # 2. Suggest some items from backlogged to work on today / tonight,
-    # 3. Send myself a random quote from my gh,
-    # 4. Append to gsheet log of anything I could be interested in later, e.g. unaccounted for time.
-    
     # read content
     conf_reader = ConfReader('conf.json')
     
