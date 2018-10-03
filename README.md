@@ -13,7 +13,28 @@
 
 ### How to use
 
+* Install dependencies
+```
+pip3 install --upgrade --user google-api-python-client oauth2client
+```
+* Create src/conf.json looking like this
+```
+{
+    "quote-url": "https://xxx",
+    "email-user": "xxx@xxx.com",
+    "email-pwd": "xxx",
+    "email-recipient": "yyy@yyy.com",
+    "email-sender": "zzz"
+}
+```
+* [Set up Google oauth2 client secret](https://developers.google.com/api-client-library/python/guide/aaa_oauth) (expects src/client/credentials.json to bootstrap, and keeps src/client/token.json for authentication)
+* Example crontab -e setup
+```
+0 20 * * * /home/zhehao/issue-tracker/src/main.py
+```
+
 ### Dependencies
 
 * Google spreadsheet Python API
+* oauth2client
 * smtplib
