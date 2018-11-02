@@ -22,7 +22,7 @@ def send_email(emailer, sender, receiver, msg):
 if __name__ == "__main__":
     # read content
     conf_reader = ConfReader('conf.json')
-    
+
     quote_reader = QuotesReader(conf_reader['quote-url'])
     quote = select_quote(quote_reader)
     quote_str = "Quote of the day: " + "\n" + quote['content'] + "  -- " + quote["author"]
@@ -30,15 +30,17 @@ if __name__ == "__main__":
     items_reader = ItemsReader(GSheetClient('client/token.json', 'client/credentials.json'))    
     daily = items_reader.read_daily()
     confs = items_reader.read_conf()
+    laws  = items_reader.read_laws()
 
     review_items = items_reader.read_review_backlog()
+
     review = Review()
 
     # fill unscheduled reviews, merge, get todo list
     review.fill_review_dates(confs, review_items)
     review.merge_review_items(daily, confs, review_items)
     todo_list = review.reschedule_and_generate_todo(confs, review_items)
-    
+
     # write review schedules back to sheet
     items_reader.write_review_backlog(review.to_table(review_items))
 
@@ -52,11 +54,17 @@ if __name__ == "__main__":
     else:
         todo_list_str = "Looks like there are no items to review today.\n"
 
+    laws_str = 'Laws enacted:\n'
+    for law in laws:
+        if law['start_date'] <= date.today() and law['end_date'] >= date.today():
+            laws_str += '  - ' + law['law'] + ' : ' + law['description']
+
     today_str = date.today().strftime("%B %d %Y")
-    msg = 'Subject: {}\n\n{}\n{}\n\n{}\n\n{}'.format('Issues for ' + today_str,
+    msg = 'Subject: {}\n\n{}\n{}\n\n{}\n\n{}\n\n{}'.format('Issues for ' + today_str,
                                                      greetings_str,
                                                      todo_list_str,
                                                      quote_str.encode('utf-8').decode('unicode_escape'),
+                                                     laws_str,
                                                      close_str)
 
     print(msg)

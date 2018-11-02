@@ -9,6 +9,7 @@ DAILY_SHEET_RANGE  = 'daily!A1:ZZ'
 REVIEW_SHEET_RANGE = 'review_backlog!A1:ZZ'
 ITEMS_SHEET_RANGE  = 'items_backlog!A1:ZZ'
 CONF_SHEET_RANGE   = 'configuration!A1:ZZ'
+LAWS_SHEET_RANGE   = 'laws!A1:ZZ'
 
 # Data model dependent reader class
 class ItemsReader():
@@ -63,6 +64,23 @@ class ItemsReader():
 
     def read_items_backlog(self):
         return
+
+    def read_laws(self):
+        rows = self.client.read(SPREADSHEET_ID, LAWS_SHEET_RANGE)
+        laws = []
+        cnt = 0
+        for row in rows:
+            cnt += 1
+            if cnt == 1:
+                continue
+            print(row)
+            laws.append({
+                'law': row[0],
+                'description': row[1],
+                'start_date': datetime.datetime.strptime(row[2], '%m/%d/%y').date(),
+                'end_date': datetime.datetime.strptime(row[3], '%m/%d/%y').date()
+            })
+        return laws
 
     def read_conf(self):
         rows = self.client.read(SPREADSHEET_ID, CONF_SHEET_RANGE)

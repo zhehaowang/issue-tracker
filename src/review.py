@@ -39,7 +39,7 @@ class Review():
     def fill_review_dates(self, confs, reviews):
         review_schedule = self.get_review_schedule(confs)
         start_time = datetime.now()
-        
+
         for key in reviews:
             for idx in range(len(reviews[key]), len(review_schedule)):
                 event = {
