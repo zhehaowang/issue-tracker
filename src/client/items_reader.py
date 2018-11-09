@@ -73,7 +73,6 @@ class ItemsReader():
             cnt += 1
             if cnt == 1:
                 continue
-            print(row)
             laws.append({
                 'law': row[0],
                 'description': row[1],

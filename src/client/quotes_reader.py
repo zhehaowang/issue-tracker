@@ -10,7 +10,7 @@ class QuotesReader():
 
     def read_quotes(self):
         resp = urllib.request.urlopen(self.url)
-        content = str(resp.read())
+        content = str(resp.read().strip())
         result = content.split(r'\n\n')
         quotes = []
         for item in result:
