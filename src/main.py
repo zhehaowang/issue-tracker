@@ -58,7 +58,7 @@ if __name__ == "__main__":
         laws_str = 'Laws enacted:\n'
         for law in laws:
             if law['start_date'] <= date.today() and law['end_date'] >= date.today():
-                laws_str += '  - ' + law['law'] + ' : ' + law['description']
+                laws_str += '  - ' + law['law'] + ' : ' + law['description'] + '\n'
 
         today_str = date.today().strftime("%B %d %Y")
         msg = 'Subject: {}\n\n{}\n{}\n\n{}\n\n{}\n\n{}'.format('Issues for ' + today_str,
